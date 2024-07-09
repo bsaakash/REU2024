@@ -35,7 +35,9 @@ class ExternalFireCurve:
 
     def firetemp(self):
         return 20 + 660 * (
-            1 - 0.686 * np.exp(-0.32 * self.time) - 0.313 * np.exp(-3.8 * self.time)
+            1
+            - 0.686 * np.exp(-0.32 * self.time)
+            - 0.313 * np.exp(-3.8 * self.time)
         )
 
 
@@ -47,7 +49,9 @@ class HydrocarbonFireCurve:
 
     def firetemp(self):
         return 20 + 1080 * (
-            1 - 0.325 * np.exp(-0.167 * self.time) - 0.675 * np.exp(-2.5 * self.time)
+            1
+            - 0.325 * np.exp(-0.167 * self.time)
+            - 0.675 * np.exp(-2.5 * self.time)
         )
 
 
@@ -114,7 +118,9 @@ class ParametricFireCurve:
         return A_v
 
     def window_opening_height(self):
-        H_v = (self.window_base * (self.window_height**2)) / self.window_area  # m
+        H_v = (
+            self.window_base * (self.window_height**2)
+        ) / self.window_area  # m
         return H_v
 
     def room_total_internal_surface_area(self):
@@ -167,8 +173,11 @@ class ParametricFireCurve:
 
     def fictitious_ratio(self):
         r = (
-            self.ventilation_factor / self.reference_surface_area_of_unit_length
-        ) ** 2 / (self.sqrt_thermal_inertia / self.reference_breadth_of_beam) ** 2
+            self.ventilation_factor
+            / self.reference_surface_area_of_unit_length
+        ) ** 2 / (
+            self.sqrt_thermal_inertia / self.reference_breadth_of_beam
+        ) ** 2
         return r
 
     def fictitious_time(self):
@@ -200,11 +209,15 @@ class ParametricFireCurve:
         elif self.fictitious_time * self.time_steps_coefficient >= int(
             self.fictitious_time * self.time_steps_coefficient
         ):
-            rounded_t_star = self.fictitious_time + 1 / self.time_steps_coefficient
+            rounded_t_star = (
+                self.fictitious_time + 1 / self.time_steps_coefficient
+            )
         elif self.fictitious_time * self.time_steps_coefficient <= int(
             self.fictitious_time * self.time_steps_coefficient
         ):
-            rounded_t_star = self.fictitious_time + 1 / self.time_steps_coefficient
+            rounded_t_star = (
+                self.fictitious_time + 1 / self.time_steps_coefficient
+            )
         return rounded_t_star
 
     def max_fire_temp(self):
@@ -233,7 +246,9 @@ class ParametricFireCurve:
 
         # round the total fictitious duration
 
-    def rounded_total_fictitous_duration(self):  # round the fictitious duration
+    def rounded_total_fictitous_duration(
+        self,
+    ):  # round the fictitious duration
         d = self.time_steps_coefficient
         if self.total_fictitious_duration * d == int(
             self.total_fictitious_duration * d
@@ -242,7 +257,9 @@ class ParametricFireCurve:
         elif self.total_fictitious_duration * d >= int(
             self.total_fictitious_duration * d
         ):
-            self.total_fictitious_duration = self.total_fictitious_duration + 1 / d
+            self.total_fictitious_duration = (
+                self.total_fictitious_duration + 1 / d
+            )
         elif self.total_fictitious_duration * d <= int(
             self.total_fictitious_duration * d
         ):
@@ -257,7 +274,10 @@ class ParametricFireCurve:
         t = np.linspace(
             0,
             self.rounded_total_fictitous_duration,
-            int(self.time_steps_coefficient * self.rounded_total_fictitous_duration),
+            int(
+                self.time_steps_coefficient
+                * self.rounded_total_fictitous_duration
+            ),
         )
         return t
 
@@ -337,7 +357,7 @@ class MaterialProperty:
 
     def youngs_modulus(self):
         return
-    
+
     def yield_strength(self):
         return
 
@@ -387,7 +407,9 @@ class ProtectedSteelTemperature:
         self.protection_type = protection
         self.section_type = section_type
 
-        self.convective_heat_transfer_coeff = convective_heat_transfer_coefficient
+        self.convective_heat_transfer_coeff = (
+            convective_heat_transfer_coefficient
+        )
         self.stefan_boltzmann_coefficient = stefan_boltzmann_coefficient
 
         self.section_surface_area_of_unit_length_member = F
@@ -417,9 +439,9 @@ class ProtectedSteelTemperature:
         return self.contour_protection_section_factor
 
     def protection_constant(self):
-        phi = (ProtectionProperty.density * ProtectionProperty.specific_heat) / (
-            MaterialProperty.density * MaterialProperty.specific_heat
-        )
+        phi = (
+            ProtectionProperty.density * ProtectionProperty.specific_heat
+        ) / (MaterialProperty.density * MaterialProperty.specific_heat)
         return phi
 
     def temperature_change_protected_steel_member(self):
@@ -470,7 +492,9 @@ class UnprotectedSteelTemperature:
         self.protection_type = protection
         self.section_type = section_type
 
-        self.convective_heat_transfer_coeff = convective_heat_transfer_coefficient
+        self.convective_heat_transfer_coeff = (
+            convective_heat_transfer_coefficient
+        )
         self.stefan_boltzmann_coefficient = stefan_boltzmann_coefficient
 
         self.section_surface_area_of_unit_length_member = F
@@ -538,7 +562,6 @@ class UnprotectedSteelTemperature:
 
 
 # STEEL TEMPERATURE CALCULATION
-
 
 
 # DEMAND MODULE
