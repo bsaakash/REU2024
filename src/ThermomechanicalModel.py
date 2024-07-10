@@ -114,7 +114,7 @@ class ParametricFireCurve:
         return A_v
 
     def window_opening_height(self):
-        H_v = (self.window_base * (self.window_height**2)) / self.window_area  # m
+        H_v = (self.window_base * (self.window_height**2)) / self.window_area()  # m
         return H_v
 
     def room_total_internal_surface_area(self):
@@ -127,17 +127,17 @@ class ParametricFireCurve:
 
     def ventilation_factor(self):
         F_v = (
-            self.window_area
-            * np.sqrt(self.window_opening_height)
-            / self.room_total_internal_surface_area
+            self.window_area()
+            * np.sqrt(self.window_opening_height())
+            / self.room_total_internal_surface_area()
         )  # m^0.5
         return F_v
 
     def fuel_load_energy_density_per_unit_area_internal_room_surface(self):
         e_t = (
             self.floor_fuel_load_energy_density
-            * self.room_floor_area
-            / self.room_total_internal_surface_area
+            * self.room_floor_area()
+            / self.room_total_internal_surface_area()
         )  # MJ/m^2
         return e_t
 
@@ -147,8 +147,8 @@ class ParametricFireCurve:
         return max(
             [
                 (0.2e-3)
-                * self.fuel_load_energy_density_per_unit_area_internal_room_surface
-                / self.ventilation_factor,
+                * self.fuel_load_energy_density_per_unit_area_internal_room_surface()
+                / self.ventilation_factor(),
                 self.ventilation_controlled_fire_duration,
             ]
         )  # hours
@@ -157,35 +157,35 @@ class ParametricFireCurve:
         if self.duration == self.ventilation_controlled_fire_duration:
             c = "fuel-controlled"
         elif (
-            self.duration
+            self.duration()
             == (0.2e-3)
-            * self.fuel_load_energy_density_per_unit_area_internal_room_surface
-            / self.ventilation_factor
+            * self.fuel_load_energy_density_per_unit_area_internal_room_surface()
+            / self.ventilation_factor()
         ):
             c = "ventilation-controlled"
         return c
 
     def fictitious_ratio(self):
         r = (
-            self.ventilation_factor / self.reference_surface_area_of_unit_length
-        ) ** 2 / (self.sqrt_thermal_inertia / self.reference_breadth_of_beam) ** 2
+            self.ventilation_factor() / self.reference_surface_area_of_unit_length
+        ) ** 2 / (self.sqrt_thermal_inertia() / self.reference_breadth_of_beam) ** 2
         return r
 
     def fictitious_time(self):
-        t_star = self.fictitious_ratio * self.duration  # hours
+        t_star = self.fictitious_ratio() * self.duration()  # hours
         return t_star
 
         # find x for the decay period calculations
 
     def x(self):
-        self.t_star_min = self.fictitious_time * 60  # minutes
-        if self.duration > self.ventilation_controlled_fire_duration:
+        self.t_star_minutes = self.fictitious_time() * 60  # minutes
+        if self.duration() > self.ventilation_controlled_fire_duration:
             x = 1.0
-        elif self.duration == self.ventilation_controlled_fire_duration:
+        elif self.duration() == self.ventilation_controlled_fire_duration:
             x = (
                 self.ventilation_controlled_fire_duration
-                * self.fictitious_ratio
-                / self.fictitious_time
+                * self.fictitious_ratio()
+                / self.fictitious_time()
             )
         return x
 
@@ -198,32 +198,31 @@ class ParametricFireCurve:
     def max_fire_temp(self):
         return 20 + 1325 * (
             1
-            - 0.324 * np.exp(-0.2 * self.rounded_fictitous_duration)
-            - 0.204 * np.exp(-1.7 * self.rounded_fictitous_duration)
-            - 0.472 * np.exp(-19 * self.rounded_fictitous_duration)
+            - 0.324 * np.exp(-0.2 * self.rounded_fictitous_duration())
+            - 0.204 * np.exp(-1.7 * self.rounded_fictitous_duration())
+            - 0.472 * np.exp(-19 * self.rounded_fictitous_duration())
         )
 
     def total_fictitious_duration(self):
         # find the total fictitious duration
-        if self.rounded_fictitous_duration <= 0.5:
+        if self.rounded_fictitous_duration() <= 0.5:
             self.t_star_total = (
-                self.max_fire_temp - 20
-            ) / 625 + self.rounded_fictitous_duration * self.x
-        elif 0.5 < self.rounded_fictitous_duration <= 2.0:
-            self.t_star_total = (self.max_fire_temp - 20) / (
-                250 * (3 - self.rounded_fictitous_duration)
-            ) + self.rounded_fictitous_duration * self.x
-        elif self.rounded_fictitous_duration > 2.0:
+                self.max_fire_temp() - 20
+            ) / 625 + self.rounded_fictitous_duration() * self.x
+        elif 0.5 < self.rounded_fictitous_duration() <= 2.0:
+            self.t_star_total = (self.max_fire_temp() - 20) / (
+                250 * (3 - self.rounded_fictitous_duration())
+            ) + self.rounded_fictitous_duration() * self.x()
+        elif self.rounded_fictitous_duration() > 2.0:
             self.t_star_total = (
-                self.max_fire_temp - 20
-            ) / 250 + self.rounded_fictitous_duration * self.x
+                self.max_fire_temp() - 20
+            ) / 250 + self.rounded_fictitous_duration() * self.x
         return self.t_star_total
 
         # round the total fictitious duration
 
     def rounded_total_fictitous_duration(self):  # round the fictitious duration
-        d = self.time_steps_coefficient()
-        return np.ceil(self.total_fictitious_duration() * d) / d
+        return np.ceil(self.total_fictitious_duration() * self.time_steps_coefficient()) / self.time_steps_coefficient()
           # ceil; see standard library numpy
         
 
@@ -232,15 +231,15 @@ class ParametricFireCurve:
     def time_array(self):
         t = np.linspace(
             0,
-            self.rounded_total_fictitous_duration,
-            int(self.time_steps_coefficient * self.rounded_total_fictitous_duration),
+            self.rounded_total_fictitous_duration(),
+            int(self.time_steps_coefficient() * self.rounded_total_fictitous_duration()),
         )
         return t
 
-    def firetemp(self):
+    def fire_temperature(self):
         fire_temperatures = []
-        for t in self.time_array:
-            if t <= self.t_star:
+        for t in self.time_array():
+            if t <= self.rounded_fictitous_duration():
                 T = 20 + 1325 * (
                     1
                     - 0.324 * np.exp(-0.2 * t)
@@ -248,18 +247,18 @@ class ParametricFireCurve:
                     - 0.472 * np.exp(-19 * t)
                 )
             else:
-                if self.t_star <= 0.5:
-                    T = self.max_fire_temp - 625 * (
-                        t - self.t_star * self.x
-                    )  # applies for t_star_max less than or equal to 0.5
-                elif 0.5 < self.t_star <= 2.0:
-                    T = self.max_fire_temp - 250 * (3 - self.t_star) * (
-                        t - self.t_star * self.x
-                    )  # applies for t_star_max greater than 0.5 and less than or equal to 2.0
+                if self.rounded_fictitous_duration() <= 0.5:
+                    T = self.max_fire_temp() - 625 * (
+                        t - self.rounded_fictitous_duration() * self.x()
+                    )  # applies for max rounded fictitious duration less than or equal to 0.5
+                elif 0.5 < self.rounded_fictitous_duration() <= 2.0:
+                    T = self.max_fire_temp() - 250 * (3 - self.rounded_fictitous_duration()) * (
+                        t - self.rounded_fictitous_duration() * self.x()
+                    )  # applies for max rounded fictitious duration greater than 0.5 and less than or equal to 2.0
                 else:
-                    T = self.max_fire_temp - 250 * (
-                        t - self.t_star * self.x
-                    )  # applies for t_star_max greater than 2.0
+                    T = self.max_fire_temp() - 250 * (
+                        t - self.rounded_fictitous_duration() * self.x()
+                    )  # applies for max rounded fictitious duration greater than 2.0
             fire_temperatures.append(T)
         return np.array(
             fire_temperatures
