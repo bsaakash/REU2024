@@ -193,19 +193,7 @@ class ParametricFireCurve:
         return 3600 / self.time_step_seconds
 
     def rounded_fictitous_duration(self):  # round the fictitious duration
-        if self.fictitious_time * self.time_steps_coefficient == int(
-            self.fictitious_time * self.time_steps_coefficient
-        ):
-            rounded_t_star = self.fictitious_time
-        elif self.fictitious_time * self.time_steps_coefficient >= int(
-            self.fictitious_time * self.time_steps_coefficient
-        ):
-            rounded_t_star = self.fictitious_time + 1 / self.time_steps_coefficient
-        elif self.fictitious_time * self.time_steps_coefficient <= int(
-            self.fictitious_time * self.time_steps_coefficient
-        ):
-            rounded_t_star = self.fictitious_time + 1 / self.time_steps_coefficient
-        return rounded_t_star
+        return np.ceil(self.fictitious_time() * self.time_steps_coefficient()) / self.time_steps_coefficient()
 
     def max_fire_temp(self):
         return 20 + 1325 * (
@@ -234,22 +222,10 @@ class ParametricFireCurve:
         # round the total fictitious duration
 
     def rounded_total_fictitous_duration(self):  # round the fictitious duration
-        d = self.time_steps_coefficient
-        if self.total_fictitious_duration * d == int(
-            self.total_fictitious_duration * d
-        ):
-            self.total_fictitious_duration = self.total_fictitious_duration
-        elif self.total_fictitious_duration * d >= int(
-            self.total_fictitious_duration * d
-        ):
-            self.total_fictitious_duration = self.total_fictitious_duration + 1 / d
-        elif self.total_fictitious_duration * d <= int(
-            self.total_fictitious_duration * d
-        ):
-            self.total_fictitious_duration = (
-                self.total_fictitious_duration + 1 / d
-            )  # ceil; see standard library numpy
-        return
+        d = self.time_steps_coefficient()
+        return np.ceil(self.total_fictitious_duration() * d) / d
+          # ceil; see standard library numpy
+        
 
         # derive the time array from t = 0 to t = total fictitious duration
 
@@ -337,7 +313,7 @@ class MaterialProperty:
 
     def youngs_modulus(self):
         return
-    
+
     def yield_strength(self):
         return
 
@@ -445,6 +421,7 @@ class ProtectedSteelTemperature:
 class UnprotectedSteelTemperature:
     def __init__(
         self,
+        T_f0,
         T_f,
         T_s,
         t0,
@@ -461,8 +438,10 @@ class UnprotectedSteelTemperature:
         stefan_boltzmann_coefficient=56.7 * 10 ^ (-12),
     ):
 
-        self.fire_temperature = T_f
+        self.fire_initial_temperature = T_f0
+        self.fire_final_temperature = T_f
         self.steel_temperature = T_s
+        self.fire_temperature = T_f
 
         self.time_initial = t0
         self.time_final = t
@@ -534,20 +513,38 @@ class UnprotectedSteelTemperature:
                     + self.stefan_boltzmann_coefficient
                 )
             )
-        return
+        return temperature_change_per_time_step
 
 
 # STEEL TEMPERATURE CALCULATION
 
 
+# IMPORTING STUFF FROM DATABASE
+class Element:
+    def __init__(self):
+        return
+
 
 # DEMAND MODULE
 class Demand:
-    def __init__(self, P):
-        r = P
+    def __init__(self, dead_load, live_load, eccentricity, thermal_expansion_coefficient, cross_sectional_area):
+        self.dead_load = dead_load
+        self.live_load = live_load
+        self.thermal_expansion_coefficient = thermal_expansion_coefficient
+        self.cross_sectional_area = cross_sectional_area
+
+    def internal_force(self):
+        return self.thermal_expansion_coefficient * self.cross_sectional_area * temperature_change_array * youngs_modulus_of_elasticity
+
+    def applied_column_load(self):
+        P = 1.2 * self.dead_load + 1.6 * self.live_load
+        return 
+
+    def applied_beam_load(self):
+        w = 1.2 * self.dead_load + 1.6 * self.live_load
+        return
 
     def column(self):
-        self
         return
 
     def beam(self):
@@ -555,16 +552,28 @@ class Demand:
 
 
 # CAPACITY MODULE
-class Capacity:
-    def __init__(self, P):
+class ColumnCapacity:
+    def __init__(self, youngs_modulus_of_elasticity, moment_of_inertia, element_length, eccentricity):
+        self.I = moment_of_inertia
+        self.E = youngs_modulus_of_elasticity
+        self.L = element_length
+    
+    def critical_buckling_load(self):
+        P = np.pi**2 * self.E * self.I / (self.L**2)
+        return
+
+    def column(self):
+        self
+        return
+
+class BeamCapacity:
+    def __init__(self, youngs_modulus_of_elasticity, moment_of_inertia, element_length):
         r = P
 
     def column(self):
         self
         return
 
-    def beam(self):
-        return
 
 
 # FAILURE EVALUATION
