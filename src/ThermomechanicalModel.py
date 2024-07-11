@@ -429,6 +429,7 @@ class SteelMaterialProperty:
             * SteelReductionFactors.interpolate_reduction_factor_youngs_modulus()
         )
 
+
 # UNPROTECTED STEEL ELEMENT
 class UnprotectedSteelTemperature:
     def __init__(
@@ -525,6 +526,7 @@ class UnprotectedSteelTemperature:
             )
         return temperature_change_per_time_step
 
+
 # PROTECTIVE MATERIAL MODULE
 class ProtectionProperty:
     def __init__(
@@ -538,6 +540,7 @@ class ProtectionProperty:
         self.specific_heat = specific_heat_insulation
         self.density = density_of_insulation
         self.thermal_conductivity = thermal_conductivity_of_insulation
+
 
 # PROTECTED STEEL ELEMENT
 class ProtectedSteelTemperature:
@@ -624,9 +627,6 @@ class ProtectedSteelTemperature:
         return temperature_change_per_time_step
 
 
-
-
-
 # TEMPERATURES CALCULATIONS
 
 
@@ -686,10 +686,10 @@ class ColumnDemand:
         return P
 
 
-
 class BeamCapacity:
     def __init__(self, youngs_modulus_of_elasticity, moment_of_inertia, element_length):
         return
+
     def beam(self):
         return
 

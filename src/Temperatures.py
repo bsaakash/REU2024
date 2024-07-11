@@ -1,12 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 # STANDARD FIRE CURVE
 class ISO834FireCurve:
     def __init__(self, t):
         self.time = t
+
     def firetemp(self):
         return 20 + 345 * np.log10(8 * self.time + 1)
+
 
 # EUROCODE REDUCTION FACTOR MODULE
 class SteelReductionFactors:
@@ -89,12 +92,13 @@ class SteelReductionFactors:
             self.reduction_factor_for_youngs_modulus,
         )
 
+
 # MATERIAL MODULE
 class SteelMaterialProperty:
     def __init__(
         self,
-        room_temperature_yield_strength=50, #ksi
-        proportional_limit=65,  #ksi
+        room_temperature_yield_strength=50,  # ksi
+        proportional_limit=65,  # ksi
         room_temperature_youngs_modulus=29000,
     ):
         self.room_temperature_youngs_modulus = room_temperature_youngs_modulus
@@ -141,7 +145,6 @@ class SteelMaterialProperty:
     def density(self):
         return 7850
 
-
     def effective_yield_strength(self):
         reduction_factors = SteelReductionFactors(self.steel_temperature)
         return (
@@ -162,7 +165,8 @@ class SteelMaterialProperty:
             self.room_temperature_youngs_modulus
             * reduction_factors.interpolate_reduction_factor_youngs_modulus()
         )
-    
+
+
 # UNPROTECTED STEEL PARAMETERS
 class UnprotectedSteelParameters:
     def __init__(
@@ -216,6 +220,7 @@ class UnprotectedSteelParameters:
     def resultant_emissivity(self):
         return self.fire_emissivity * self.material_emissivity
 
+
 # UNPROTECTED STEEL TEMPERATURE
 class PublishedFireUnprotectedSteelTemperature:
     def __init__(
@@ -259,28 +264,28 @@ class PublishedFireUnprotectedSteelTemperature:
             delta_t[i] = time_array[i + 1] - time_array[i]
             if delta_t[i] > 5:
                 raise ValueError("Error: delta_t is greater than 5 seconds.")
-            
+
             steel_temperature = T_s[i]
             material_properties = SteelMaterialProperty(steel_temperature)
             steel_specific_heat[i] = material_properties.specific_heat()
             steel_density[i] = material_properties.density()
-            
+
             delta_T_s[i] = (
-            delta_t[i]
-            * unprotected_parameters.correction_factor()
-            * unprotected_parameters.contour_protection_section_factor
-            * (
-                unprotected_parameters.convective_heat_transfer_coeff
-                * (fire_temperatures[i + 1] - T_s[i])
-                + unprotected_parameters.stefan_boltzmann_coefficient
-                * unprotected_parameters.resultant_emissivity()
-                * (fire_temperatures[i + 1]**4 - T_s[i]**4)
+                delta_t[i]
+                * unprotected_parameters.correction_factor()
+                * unprotected_parameters.contour_protection_section_factor
+                * (
+                    unprotected_parameters.convective_heat_transfer_coeff
+                    * (fire_temperatures[i + 1] - T_s[i])
+                    + unprotected_parameters.stefan_boltzmann_coefficient
+                    * unprotected_parameters.resultant_emissivity()
+                    * (fire_temperatures[i + 1] ** 4 - T_s[i] ** 4)
                 )
-            / (steel_density[i] * steel_specific_heat[i])
+                / (steel_density[i] * steel_specific_heat[i])
             )
             T_s[i + 1] = T_s[i] + delta_T_s[i]
-                  
-        return T_s, delta_t, delta_T_s  
+
+        return T_s, delta_t, delta_T_s
 
 
 # Assume values for F, V, F_b, V_b
@@ -289,7 +294,7 @@ V = 200
 F_b = 50
 V_b = 100
 
-t = np.linspace(0, 180, 180) # Time in minutes
+t = np.linspace(0, 180, 180)  # Time in minutes
 
 fire_curve = ISO834FireCurve(t)
 
