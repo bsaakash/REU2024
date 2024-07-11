@@ -93,26 +93,24 @@ class SteelReductionFactors:
 class SteelMaterialProperty:
     def __init__(
         self,
-        temperature_steel,
-        room_temperature_yield_strength=50,
-        proportional_limit=65,
+        room_temperature_yield_strength=50, #ksi
+        proportional_limit=65,  #ksi
         room_temperature_youngs_modulus=29000,
     ):
-        self.steel_temperature = temperature_steel
         self.room_temperature_youngs_modulus = room_temperature_youngs_modulus
         self.room_temperature_yield_strength = room_temperature_yield_strength
         self.proportional_limit = proportional_limit
         return
 
     # VERIFY specific heat and thermal conductivity to the Eurocode
-    def specific_heat(self):
+    def specific_heat(self, temperature_steel):
         # Define the specific heat constant for the time step
-        if 20 <= self.steel_temperature < 600:
+        if 20 <= temperature_steel < 600:
             specific_heat = (
                 425
-                + 0.773 * self.steel_temperature
-                - 1.69 * (10 ** (-3)) * self.steel_temperature**2
-                + 2.22 * (10 ** (-6)) * self.steel_temperature**3
+                + 0.773 * temperature_steel
+                - 1.69 * (10 ** (-3)) * temperature_steel**2
+                + 2.22 * (10 ** (-6)) * temperature_steel**3
             )
             # applies when the steel temperature is greater than or equal to 20 degrees Celsius and less than 600 degrees Celsius
         elif 600 <= self.steel_temperature < 735:
@@ -128,12 +126,12 @@ class SteelMaterialProperty:
             specific_heat = None
         return specific_heat
 
-    def thermal_conductivity(self):
+    def thermal_conductivity(self, temperature_steel):
         # Define the thermal conductivity for the time step
-        if 20 <= self.steel_temperature < 800:
-            thermal_conductivity = 54 - 0.0333 * self.steel_temperature
+        if 20 <= temperature_steel < 800:
+            thermal_conductivity = 54 - 0.0333 * temperature_steel
             # applies when the steel temperature is greater than or equal to 20 degrees Celsius and less than 800 degrees Celsius
-        elif 800 <= self.steel_temperature <= 1200:
+        elif 800 <= temperature_steel <= 1200:
             thermal_conductivity = 27.3
             # applies when the steel temperature is greater than or equal to 800 degrees Celsius and less than or equal to 1200 degrees Celsius
         else:
@@ -147,7 +145,7 @@ class SteelMaterialProperty:
     def effective_yield_strength(self):
         reduction_factors = SteelReductionFactors(self.steel_temperature)
         return (
-            self.room_temperature_youngs_modulus
+            self.room_temperature_yield_strength
             * reduction_factors.interpolate_reduction_factor_effective_yield_strength()
         )
 
