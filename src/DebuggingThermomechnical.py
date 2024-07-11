@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# t = np.linspace(0, 180, 180)  # Time in minutes
-
 # FIRE CURVE MODULE
 class ISO834:
     def __init__(self, t):
@@ -29,7 +27,7 @@ class Hydrocarbon:
         return 20 + 1080 * (1 - 0.325 * np.exp(-0.167 * self.time) - 0.675 * np.exp(-2.5 * self.time))
     
 # time
-t = np.linspace(0, 180, 180)
+t = np.linspace(0, 180, 180) # Time in minutes
 
 # instances
 curve1 = ISO834(t)
