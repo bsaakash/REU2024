@@ -35,7 +35,9 @@ class ExternalFireCurve:
 
     def firetemp(self):
         return 20 + 660 * (
-            1 - 0.686 * np.exp(-0.32 * self.time) - 0.313 * np.exp(-3.8 * self.time)
+            1
+            - 0.686 * np.exp(-0.32 * self.time)
+            - 0.313 * np.exp(-3.8 * self.time)
         )
 
 
@@ -47,7 +49,9 @@ class HydrocarbonFireCurve:
 
     def firetemp(self):
         return 20 + 1080 * (
-            1 - 0.325 * np.exp(-0.167 * self.time) - 0.675 * np.exp(-2.5 * self.time)
+            1
+            - 0.325 * np.exp(-0.167 * self.time)
+            - 0.675 * np.exp(-2.5 * self.time)
         )
 
 
@@ -460,7 +464,9 @@ class UnprotectedSteelTemperature:
 
         self.section_type = section_type
 
-        self.convective_heat_transfer_coeff = convective_heat_transfer_coefficient
+        self.convective_heat_transfer_coeff = (
+            convective_heat_transfer_coefficient
+        )
         self.stefan_boltzmann_coefficient = stefan_boltzmann_coefficient
 
         self.section_surface_area_of_unit_length_member = F
