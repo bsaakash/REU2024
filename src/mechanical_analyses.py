@@ -39,3 +39,14 @@ class SteelColumn(SteelMechanicalProperties, Component):
 
     def demand(self, component_temperature):
         return
+
+
+class SteelBeam(SteelMechanicalProperties, Component):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def capacity(self, component_temperature):
+        return
+
+    def demand(self, component_temperature):
+        return
