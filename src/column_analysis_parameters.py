@@ -1,13 +1,12 @@
-# properties
-A = 130  # cross-sectional area in in²
-L = 13*12    # in
-I = 1150  # in^4, using W14X342 column
+# input parameters
+epsilon_alpha = 0
 
-E = 29000 # ksi
-epsilonE = 0
+epsilon_modulus = 0
+epsilon_yield = 0
 
-alpha = 12e-6    # coefficient of thermal expansion (1/°C)
+epsilon_density = 0
+epsilon_specific_heat = 0
+epsilon_thermal_conductivity = 0
 
-DCR = 0.04940482
-e = 0.00300645
-
+epsilon_convective_heat_transfer_coefficient = 0      # optional; could introduce randomness
+epsilon_material_emissivity = 0     # optional; could introduce randomness

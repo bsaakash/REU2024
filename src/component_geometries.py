@@ -6,13 +6,6 @@ class ComponentGeometry(Protocol):
     def __init__(self) -> None:
         pass
 
-
-
-
-
-
-
-
 all_section_database = pd.read_csv('AllSectionDatabase.csv')
 
 # geometric inputs for calculating the section factors:
