@@ -154,7 +154,8 @@ class ParametricFireCurve(FireCurve):
                 / self.ventilation_factor,
                 self.ventilation_controlled_fire_duration,
             ]
-        )  # hours
+        )
+        # output: the duration of the burning period (hours), which is the maximum betweent the 
 
         if self.duration == self.ventilation_controlled_fire_duration:
             c = "fuel-controlled"
@@ -170,6 +171,7 @@ class ParametricFireCurve(FireCurve):
         self.fictitious_ratio = (
             self.ventilation_factor / self.reference_surface_area_of_unit_length
         ) ** 2 / (self.sqrt_thermal_inertia / self.reference_breadth_of_beam) ** 2
+        # multiply by the time to get the fictitious time
 
         self.fictitious_time = self.fictitious_ratio * self.duration  # hours
         # find x for the decay period calculations
@@ -219,7 +221,6 @@ class ParametricFireCurve(FireCurve):
             np.ceil(self.total_fictitious_duration * self.time_steps_coefficient)
             / self.time_steps_coefficient
         )
-        # derive the time array from t = 0 to t = total fictitious duration
 
         t = np.linspace(
             0,
@@ -229,10 +230,12 @@ class ParametricFireCurve(FireCurve):
             ),
         )
         self.time_array = t
+        # output: time array from t = 0 to t = total fictitious duration (hours)
 
     def fire_temp(self):
         fire_temp = []
         for t in self.time_array:
+            # equation for Temperature during burning period, where t is the fictitious time (in hours)
             if t <= self.rounded_fictitous_duration:
                 T = 20 + 1325 * (
                     1

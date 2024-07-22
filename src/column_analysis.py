@@ -3,32 +3,32 @@ from column_analysis_parameters import *
 import fire_curves
 
 # input parameters
-room_temperature_modulus = 200              # GPa
-room_temperature_yield_strength = 220       # MPa
-alpha = 12e-6                               # coefficient of thermal expansion (1/°C)
-room_temperature_density = 7850             # kg/m^3
-room_temperature_specific_heat = 460        # J/kg K
-convective_heat_transfer_coefficient = 25   # W/m^2 K
+room_temperature_modulus = 200  # GPa
+room_temperature_yield_strength = 220  # MPa
+alpha = 12e-6  # coefficient of thermal expansion (1/°C)
+room_temperature_density = 7850  # kg/m^3
+room_temperature_specific_heat = 460  # J/kg K
+convective_heat_transfer_coefficient = 25  # W/m^2 K
 material_emissivity = 0.7
 
 
 DCR = 0.04940482
 e = 0.00300645
-A = 130/(3.281**2)  # cross-sectional area in m^2
-L = 13/3.281  # m
-I = 1150/(3.281**4)  # m^4, using W14X342 column
+A = 130 / (3.281**2)  # cross-sectional area in m^2
+L = 13 / 3.281  # m
+I = 1150 / (3.281**4)  # m^4, using W14X342 column
 
 
 occupancy = "office"
-thermal_conductivity = 45.8                     # W/mK
-density = room_temperature_density              # kg/m^3
-specific_heat = room_temperature_specific_heat  # J/kg K  
-window_base = 3/3.281                           # m
-window_height = 5/3.281                         # m
-room_length1 = 20/3.281                         # m
-room_length2 = 20/3.281                         # m
-room_height = 13/3.281                          # m
-floor_fuel_load_energy_density = 800            # MJ/m^2
+thermal_conductivity = 45.8  # W/mK
+density = room_temperature_density  # kg/m^3
+specific_heat = room_temperature_specific_heat  # J/kg K
+window_base = 3 / 3.281  # m
+window_height = 5 / 3.281  # m
+room_length1 = 20 / 3.281  # m
+room_length2 = 20 / 3.281  # m
+room_height = 13 / 3.281  # m
+floor_fuel_load_energy_density = 128000  # MJ/m^2
 
 
 class SteelMaterialProperty:
@@ -81,8 +81,8 @@ class UnprotectedSteelTemp:
     def get_component_temperature(
         time,
         fire_temp,
-#       density,
-#       specific_heat,
+        #       density,
+        #       specific_heat,
         convective_heat_transfer_coefficient,
         material_emissivity,
         fire_emissivity=1.0,
@@ -96,7 +96,7 @@ class UnprotectedSteelTemp:
         )
         resultant_emissivity = fire_emissivity * material_emissivity
 
-        steel_temp = np.zeros(len(Tf))
+        steel_temp = np.zeros(len(fire_temperature))
         steel_temp[0] = fire_temp[0]
         time_diffs = np.diff(time)
         for i in range(1, len(steel_temp)):
@@ -121,18 +121,28 @@ class UnprotectedSteelTemp:
         return steel_temp
 
 
-
 # fire temperature
 # time = np.arange(0, 180 * 60, 5)
-fire_curve = fire_curves.ParametricFireCurve(occupancy, thermal_conductivity, density, specific_heat, window_base, window_height, room_length1, room_length2, room_height, floor_fuel_load_energy_density)
-Tf = fire_curve.fire_temp()
+fire_curve = fire_curves.ParametricFireCurve(
+    occupancy,
+    thermal_conductivity,
+    density,
+    specific_heat,
+    window_base,
+    window_height,
+    room_length1,
+    room_length2,
+    room_height,
+    floor_fuel_load_energy_density,
+)
+fire_temperature = fire_curve.fire_temp()
 time = fire_curve.time_array
-print(Tf)
+print(fire_temperature)
 
 # steel temperature
 # inputs: contour_protection_section_factor=210, board_protection_section_factor=153, density=7850, c=700, hc=25, fire_emissivity=1.0, material_emissivity=0.7, SB_coefficient=56.7 * 10 ** (-12),
 steel_temperature = UnprotectedSteelTemp.get_component_temperature(
-    time, Tf, convective_heat_transfer_coefficient, material_emissivity
+    time, fire_temperature, convective_heat_transfer_coefficient, material_emissivity
 )
 
 
@@ -147,15 +157,15 @@ effective_elastic_modulus = material_properties.effective_elastic_modulus(
 initial_temp = steel_temperature[0]  # temperature change (°C)
 time_step = np.diff(time)
 delta_steel_temp = np.concatenate(([steel_temperature[0]], np.diff(steel_temperature)))
-sigma = effective_elastic_modulus * alpha * delta_steel_temp    # GPa
-F = sigma * A * 10**3       # MN
+sigma = effective_elastic_modulus * alpha * delta_steel_temp  # GPa
+F = sigma * A * 10**3  # MN
 internal_force = np.zeros(len(F))
 for i in range(0, len(F) - 1):
     internal_force[i] = np.sum(F[:i])
 
 
 # failure evaluation
-capacity = np.pi**2 * effective_elastic_modulus * I / L**2  * 10**3     # MN
+capacity = np.pi**2 * effective_elastic_modulus * I / L**2 * 10**3  # MN
 demand = (DCR * capacity[0] * L / (np.sqrt(L**2 - (e * L) ** 2))) + internal_force
 
 for i in range(len(demand)):
@@ -165,5 +175,9 @@ for i in range(len(demand)):
         critical_demand = demand[i]
         print(f"Temperature at failure: {critical_temp} °C")
         print(f"Time at failure: {critical_time / 60} minutes")
-        print(f"Critical load: {critical_demand} kips")
+        print(f"Critical load: {critical_demand} Meganewtons")
         break
+    else:
+        critical_temp = "DNE"
+        critical_time = "DNE"
+        critical_demand = "DNE"
