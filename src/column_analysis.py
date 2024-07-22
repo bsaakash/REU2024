@@ -1,29 +1,34 @@
 import numpy as np
 from column_analysis_parameters import *
+import fire_curves
 
 # input parameters
-room_temperature_modulus = 29000  # ksi
-room_temperature_yield_strength = 50  # ksi
-alpha = 12e-6  # coefficient of thermal expansion (1/°C)
-room_temperature_density = 7850
-room_temperature_specific_heat = 700
-convective_heat_transfer_coefficient = 25
+room_temperature_modulus = 200              # GPa
+room_temperature_yield_strength = 220       # MPa
+alpha = 12e-6                               # coefficient of thermal expansion (1/°C)
+room_temperature_density = 7850             # kg/m^3
+room_temperature_specific_heat = 460        # J/kg K
+convective_heat_transfer_coefficient = 25   # W/m^2 K
 material_emissivity = 0.7
 
 
 DCR = 0.04940482
 e = 0.00300645
-A = 130  # cross-sectional area in in²
-L = 13 * 12  # in
-I = 1150  # in^4, using W14X342 column
+A = 130/(3.281**2)  # cross-sectional area in m^2
+L = 13/3.281  # m
+I = 1150/(3.281**4)  # m^4, using W14X342 column
 
 
-class ISO834FireCurve:
-    def __init__(self, t):
-        self.time = t
-
-    def firetemp(self):
-        return 20 + 345 * np.log10(8 * self.time + 1)
+occupancy = "office"
+thermal_conductivity = 45.8                     # W/mK
+density = room_temperature_density              # kg/m^3
+specific_heat = room_temperature_specific_heat  # J/kg K  
+window_base = 3/3.281                           # m
+window_height = 5/3.281                         # m
+room_length1 = 20/3.281                         # m
+room_length2 = 20/3.281                         # m
+room_height = 13/3.281                          # m
+floor_fuel_load_energy_density = 800            # MJ/m^2
 
 
 class SteelMaterialProperty:
@@ -64,7 +69,10 @@ class SteelMaterialProperty:
 
     def effective_thermal_conductivity(self, epsilon_thermal_conductivity):
         T = self.steel_temperature
-        return np.exp(-2.72 + 1.89e-3 * T - 0.195e-6 * T**2 + 0.209 * epsilon_thermal_conductivity)
+        return np.exp(
+            -2.72 + 1.89e-3 * T - 0.195e-6 * T**2 + 0.209 * epsilon_thermal_conductivity
+        )
+
 
 class UnprotectedSteelTemp:
     def __init__(self):
@@ -73,8 +81,8 @@ class UnprotectedSteelTemp:
     def get_component_temperature(
         time,
         fire_temp,
-#        density,
-#        specific_heat,
+#       density,
+#       specific_heat,
         convective_heat_transfer_coefficient,
         material_emissivity,
         fire_emissivity=1.0,
@@ -82,10 +90,6 @@ class UnprotectedSteelTemp:
         board_protection_section_factor=153,
         SB_coefficient=56.7 * 10 ** (-12),
     ):
-        material_prop = SteelMaterialProperty(20)       # fix to update as the temperature changes.
-        density = material_prop.effective_density(epsilon_density)
-        specific_heat = material_prop.effective_specific_heat(epsilon_specific_heat)
-
 
         correction_factor_for_shadow_effect = (
             0.9 * contour_protection_section_factor / board_protection_section_factor
@@ -96,6 +100,9 @@ class UnprotectedSteelTemp:
         steel_temp[0] = fire_temp[0]
         time_diffs = np.diff(time)
         for i in range(1, len(steel_temp)):
+            material_prop = SteelMaterialProperty(steel_temp[i - 1])
+            density = material_prop.effective_density(epsilon_density)
+            specific_heat = material_prop.effective_specific_heat(epsilon_specific_heat)
             time_step = time_diffs[i - 1]
             delta_T = (
                 time_step
@@ -114,48 +121,49 @@ class UnprotectedSteelTemp:
         return steel_temp
 
 
-# fire temperature
-time = np.arange(0, 180 * 60, 5)
-fire_curve = ISO834FireCurve(time / 60)
-Tf = fire_curve.firetemp()
 
+# fire temperature
+# time = np.arange(0, 180 * 60, 5)
+fire_curve = fire_curves.ParametricFireCurve(occupancy, thermal_conductivity, density, specific_heat, window_base, window_height, room_length1, room_length2, room_height, floor_fuel_load_energy_density)
+Tf = fire_curve.fire_temp()
+time = fire_curve.time_array
+print(Tf)
 
 # steel temperature
 # inputs: contour_protection_section_factor=210, board_protection_section_factor=153, density=7850, c=700, hc=25, fire_emissivity=1.0, material_emissivity=0.7, SB_coefficient=56.7 * 10 ** (-12),
-steel_temperature = UnprotectedSteelTemp.get_component_temperature(time, Tf, convective_heat_transfer_coefficient, material_emissivity)
+steel_temperature = UnprotectedSteelTemp.get_component_temperature(
+    time, Tf, convective_heat_transfer_coefficient, material_emissivity
+)
 
 
 # reduction factors
 material_properties = SteelMaterialProperty(steel_temperature)
-effective_elastic_modulus = material_properties.effective_elastic_modulus(room_temperature_modulus, epsilon_modulus)
+effective_elastic_modulus = material_properties.effective_elastic_modulus(
+    room_temperature_modulus, epsilon_modulus
+)
 
 
 # column analysis
 initial_temp = steel_temperature[0]  # temperature change (°C)
 time_step = np.diff(time)
 delta_steel_temp = np.concatenate(([steel_temperature[0]], np.diff(steel_temperature)))
-sigma = effective_elastic_modulus * alpha * delta_steel_temp
-F = sigma * A
+sigma = effective_elastic_modulus * alpha * delta_steel_temp    # GPa
+F = sigma * A * 10**3       # MN
 internal_force = np.zeros(len(F))
 for i in range(0, len(F) - 1):
     internal_force[i] = np.sum(F[:i])
 
 
 # failure evaluation
-capacity = (
-    np.pi**2 * effective_elastic_modulus * I / L**2
-)  # capacity over varying temperature, pinned pinned
-# print(capacity)
-demand = (DCR * capacity[0] * L * 1 / (np.sqrt(L**2 - (e * L) ** 2))) + internal_force
-# print(demand)
+capacity = np.pi**2 * effective_elastic_modulus * I / L**2  * 10**3     # MN
+demand = (DCR * capacity[0] * L / (np.sqrt(L**2 - (e * L) ** 2))) + internal_force
 
 for i in range(len(demand)):
     if demand[i] >= capacity[i]:
         critical_temp = steel_temperature[i]
         critical_time = time[i]
         critical_demand = demand[i]
+        print(f"Temperature at failure: {critical_temp} °C")
+        print(f"Time at failure: {critical_time / 60} minutes")
+        print(f"Critical load: {critical_demand} kips")
         break
-
-print(f"Temperature at failure: {critical_temp} °C")
-print(f"Time at failure: {critical_time / 60} minutes")
-print(f"Critical load: {critical_demand} kips")
