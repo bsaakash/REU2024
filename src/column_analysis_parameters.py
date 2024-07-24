@@ -1,7 +1,7 @@
 # input parameters
 epsilon_alpha = 0
 
-epsilon_modulus = 0
+epsilon_steel_modulus = 0
 epsilon_yield = 0
 
 epsilon_density = 0

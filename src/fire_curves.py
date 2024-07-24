@@ -91,7 +91,7 @@ class ParametricFireCurve(FireCurve):
         floor_fuel_load_energy_density,
         F_ref=0.04,
         b_ref=1160,
-        time_step_seconds=30,
+        time_step_seconds=5,
     ):  # can set defaults to allow any order of input parameters
         occupancy_data = {
             "dwelling": ("medium", 20 / 60),
@@ -155,7 +155,7 @@ class ParametricFireCurve(FireCurve):
                 self.ventilation_controlled_fire_duration,
             ]
         )
-        # output: the duration of the burning period (hours), which is the maximum betweent the 
+        # output: the duration of the burning period (hours)
 
         if self.duration == self.ventilation_controlled_fire_duration:
             c = "fuel-controlled"
@@ -171,7 +171,7 @@ class ParametricFireCurve(FireCurve):
         self.fictitious_ratio = (
             self.ventilation_factor / self.reference_surface_area_of_unit_length
         ) ** 2 / (self.sqrt_thermal_inertia / self.reference_breadth_of_beam) ** 2
-        # multiply by the time to get the fictitious time
+        # gamma multiplier; multiply by the time to get the fictitious time
 
         self.fictitious_time = self.fictitious_ratio * self.duration  # hours
         # find x for the decay period calculations
@@ -222,14 +222,14 @@ class ParametricFireCurve(FireCurve):
             / self.time_steps_coefficient
         )
 
-        t = np.linspace(
+        t = np.arange(
             0,
-            self.rounded_total_fictitous_duration,
-            int(
-                self.time_steps_coefficient * self.rounded_total_fictitous_duration
-            ),
-        )
-        self.time_array = t
+            self.rounded_total_fictitous_duration * 3600,
+            self.time_step_seconds
+            )
+
+        self.time_array = t/3600
+        self.time_array_seconds = t
         # output: time array from t = 0 to t = total fictitious duration (hours)
 
     def fire_temp(self):
