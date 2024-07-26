@@ -1,4 +1,8 @@
 # input parameters
+epsilon_room_length1 = 0
+epsilon_room_length2 = 0
+epsilon_room_height = 0
+
 epsilon_alpha = 0
 
 epsilon_steel_modulus = 0

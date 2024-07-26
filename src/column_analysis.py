@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from column_analysis_parameters import *
+from params import *
 import fire_curves
 import material_properties
 import thermal_analyses
+import room_geometry
 
 # steel material parameters:
 room_temperature_modulus = 200000  # MPa
@@ -33,9 +34,10 @@ concrete_density = 2300
 concrete_specific_heat = 980
 window_base = 3  # m
 window_height = 2  # m
-room_length1 = 4  # m
-room_length2 = 6  # m
-room_height = 3  # m
+dims = room_geometry.RoomDimension(length1=4, length2=6, height=3)
+room_length1 = dims.length1(epsilon_room_length1)
+room_length2 = dims.length2(epsilon_room_length2)
+room_height = dims.height(epsilon_room_height)
 fire_load_fuel_energy_density = 800  # MJ/m^2
 
 
@@ -55,8 +57,8 @@ fire_curve = fire_curves.ParametricFireCurve(
 )
 fire_temperature = fire_curve.fire_temp()
 time = fire_curve.time_array_seconds
-print(f"{max(fire_temperature) = }")
-print(f"{max(time) = }")
+# print(f"{max(fire_temperature) = }")
+# print(f"{max(time) = }")
 
 
 # steel temperature:
@@ -82,13 +84,13 @@ steel_temperature = thermal_analysis.get_component_temperature(
         contour_protection_section_factor=210,
         board_protection_section_factor=153,
         SB_coefficient=56.7e-12,)
-print(f"{max(steel_temperature) = }")
+# print(f"{max(steel_temperature) = }")
 
 
 # reduction factor for elastic modulus:
 mech_mat_prop = material_properties.SteelMechanicalProperties(steel_room_temp_modulus=room_temperature_modulus)
 effective_elastic_modulus = mech_mat_prop.elastic_modulus(steel_temperature, epsilon_steel_modulus)
-print(f"{min(effective_elastic_modulus) = }")
+# print(f"{min(effective_elastic_modulus) = }")
 
 
 # column analysis:
@@ -99,7 +101,7 @@ delta_F = effective_elastic_modulus[1:] * alpha * delta_steel_temp * A # MN
 # F = sigma * A  # MN
 internal_force = np.zeros(len(steel_temperature))
 internal_force[1:] = np.cumsum(delta_F)
-print(f"{max(internal_force) = }")
+# print(f"{max(internal_force) = }")
 
 
 # failure evaluation:
@@ -109,19 +111,19 @@ if min(capacity) > demand:
     out = 0
 else:
     out = 1
-print(out)
+# print(out)
 with open("results.out", "w") as f:
     f.write(f"{out}")
 
 # print(f"{max(capacity) = }")
-print(f"{min(capacity) = }")
-print(f"{(demand) = }")
+# print(f"{min(capacity) = }")
+# print(f"{(demand) = }")
 
 # plt.plot(steel_temperature, effective_elastic_modulus)
 # plt.show()
 
-plt.plot(steel_temperature, capacity)
-plt.show()
+# plt.plot(steel_temperature, capacity)
+# plt.show()
 
 # DCR_range = np.linspace(0, 1, 101)
 # critical_temps_array = np.zeros_like(DCR_range)
