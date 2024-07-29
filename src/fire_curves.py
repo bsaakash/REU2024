@@ -79,6 +79,7 @@ class ParametricFireCurve(FireCurve):
     #          .firetemp (degrees Celsius)
     def __init__(
         self,
+        gamma,
         occupancy,
         thermal_conductivity,
         density,
@@ -135,7 +136,7 @@ class ParametricFireCurve(FireCurve):
             + self.room_length2 * self.room_height
         )  # m^2 for all floors
 
-        self.ventilation_factor = (
+        self.ventilation_factor = (1 - gamma) * (
             self.window_area
             * np.sqrt(self.window_opening_height)
             / self.room_total_internal_surface_area

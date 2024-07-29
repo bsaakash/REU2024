@@ -8,7 +8,7 @@ column_database_path = Path("/Users/emilynakamura/Downloads/NHERI/Technical/Auto
 column_dataframe = pd.read_csv(column_database_path)
 
 class SectionProperties:
-    def __init__(self, section_size, weight, A, d, bf, tw, tf, Ix, Iy, F, V, Fb, Vb, contour_protection_section_factor, board_protection_section_factor, ksh):
+    def __init__(self, section_size, weight, A, d, bf, tw, tf, Ix, Iy, F, V, Fb, Vb, contour_protection_section_factor, board_protection_section_factor, ksh, min_protection_thickness):
         self.section_size = section_size
         self.weight = weight
         self.A = A

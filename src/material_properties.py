@@ -90,12 +90,15 @@ class SteelMechanicalProperties(MechanicalProperties):
 class SteelThermalProperties(ThermalProperties):
     def __init__(self) -> None:
         super().__init__()
-#TODO
+
     def thermal_conductivity(self, temperature, epsilon=0):
         T = temperature
-        return np.exp(
-            -2.72 + 1.89e-3 * T - 0.195e-6 * T**2 + 0.209 * epsilon
-        )
+        if T <= 800:
+            deterministic_thermal_conductivity = 54 - 3.33e-2 * T
+            thermal_conductivity = 60 - np.exp(np.log(60 - deterministic_thermal_conductivity) + 145.4e-3 - 0.5e-3 * T + 0.206 * epsilon)
+        elif T > 800:
+            thermal_conductivity = 60 - np.exp(3.23 + 0.206 * epsilon)
+        return thermal_conductivity
 
     def thermal_strain(self, temperature, epsilon=0):
         T = temperature
@@ -119,16 +122,31 @@ class SteelThermalProperties(ThermalProperties):
             raise ValueError
         return thermal_strain
 
-#TODO
-    def specific_heat(self, temperature, epsilon=0):
-        T = temperature
-        return 1700 - np.exp(
-            6.81 - 1.61e-3 * T + 0.44e-6 * T**2 + 0.213 * epsilon
-        )
 #TODO    
-    def density(self, temperature, epsilon=0):
-        T = temperature
-        return np.exp(-2.028 + 7.83 * T ** (-0.0065) + 0.122 * epsilon)
+
+    def specific_heat(self, temperature):
+        # Define the specific heat constant for the time step
+        if 20 <= temperature < 600:
+            specific_heat = (
+                425
+                + 0.773 * temperature
+                - 1.69 * (10 ** (-3)) * temperature**2
+                + 2.22 * (10 ** (-6)) * temperature**3
+            )
+            # applies when the steel temperature is greater than or equal to 20 degrees Celsius and less than 600 degrees Celsius
+        elif 600 <= temperature < 735:
+            specific_heat = 666 + 13002 / (738 - temperature)
+            # applies when the steel temperature is greater than or equal to 600 degrees Celsius and less than 735 degrees Celsius
+        elif 735 <= temperature < 900:
+            specific_heat = 545 + 17820 / (temperature - 731)
+            # applies when the steel temperature is greater than or equal to 735 degrees Celsius and less than 900 degrees Celsius
+        elif 900 <= temperature <= 1200:
+            specific_heat = 650
+            # applies when the steel temperature is greater than or equal to 900 degrees Celsius and less than or equal to 1200 degrees Celsius
+        return specific_heat
+
+    def density(self, epsilon=0):
+        return 7850
 
 
 class InsulationThermalProperties(ThermalProperties):
