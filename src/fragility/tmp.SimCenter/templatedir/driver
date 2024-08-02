@@ -1,0 +1,2 @@
+"/Applications/quoFEM.app/Contents/MacOS/applications/performUQ/templateSub/simCenterSub"  params.in tmpSimCenter.params params.py
+python3 column_analysis.py out 1> workflow.err 2>&1

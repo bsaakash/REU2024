@@ -17,7 +17,7 @@ room_temperature_modulus = 200000  # MPa
 # alpha = 12e-6  # coefficient of thermal expansion (1/°C)
 steel_room_temperature_density = 7850  # kg/m^3 STEEL
 room_temperature_specific_heat = 460  # J/kg K
-convective_heat_transfer_coefficient = 35  # W/m^2 K
+convective_heat_transfer_coefficient = 25  # W/m^2 K
 material_emissivity = 0.7
 # thermal_conductivity = 45.8  # W/mK
 # density = steel_room_temperature_density  # kg/m^3
@@ -164,3 +164,4 @@ with open("results.out", "w") as f:
 
 # plt.plot(DCR_range, critical_temps_array)
 # plt.show()
+
