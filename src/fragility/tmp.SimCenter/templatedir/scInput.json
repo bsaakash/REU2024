@@ -1,0 +1,129 @@
+{
+    "Applications": {
+        "FEM": {
+            "Application": "OpenSeesPy",
+            "ApplicationData": {
+                "MS_Path": "/Users/emilynakamura/Downloads/NHERI/Technical/REU2024/src",
+                "PA_Path": "/Users/emilynakamura/Downloads/NHERI/Technical/REU2024/src",
+                "mainScript": "column_analysis.py",
+                "parametersScript": "params.py",
+                "postprocessScript": ""
+            }
+        },
+        "UQ": {
+            "Application": "Dakota-UQ",
+            "ApplicationData": {
+            }
+        }
+    },
+    "EDP": [
+        {
+            "length": 1,
+            "name": "out",
+            "type": "scalar"
+        }
+    ],
+    "FEM": {
+    },
+    "UQ": {
+        "parallelExecution": true,
+        "samplingMethodData": {
+            "method": "LHS",
+            "samples": 50,
+            "seed": 439
+        },
+        "saveWorkDir": true,
+        "uqType": "Forward Propagation"
+    },
+    "WorkflowType": "Building Simulation",
+    "localAppDir": "/Applications/quoFEM.app/Contents/MacOS",
+    "randomVariables": [
+        {
+            "distribution": "Normal",
+            "inputType": "Parameters",
+            "mean": 0,
+            "name": "epsilon_protection_specific_heat",
+            "refCount": 4,
+            "stdDev": 1,
+            "value": "RV.epsilon_protection_specific_heat",
+            "variableClass": "Uncertain"
+        },
+        {
+            "distribution": "Normal",
+            "inputType": "Parameters",
+            "mean": 0,
+            "name": "epsilon_steel_modulus",
+            "refCount": 4,
+            "stdDev": 1,
+            "value": "RV.epsilon_steel_modulus",
+            "variableClass": "Uncertain"
+        },
+        {
+            "distribution": "Normal",
+            "inputType": "Parameters",
+            "mean": 0,
+            "name": "epsilon_steel_thermal_strain",
+            "refCount": 4,
+            "stdDev": 1,
+            "value": "RV.epsilon_steel_thermal_strain",
+            "variableClass": "Uncertain"
+        },
+        {
+            "distribution": "Normal",
+            "inputType": "Parameters",
+            "mean": 0,
+            "name": "epsilon_steel_thermal_conductivity",
+            "refCount": 4,
+            "stdDev": 1,
+            "value": "RV.epsilon_steel_thermal_conductivity",
+            "variableClass": "Uncertain"
+        },
+        {
+            "distribution": "Uniform",
+            "inputType": "Parameters",
+            "lowerbound": 5,
+            "name": "room_length1",
+            "refCount": 3,
+            "upperbound": 10,
+            "value": "RV.room_length1",
+            "variableClass": "Uncertain"
+        },
+        {
+            "distribution": "Uniform",
+            "inputType": "Parameters",
+            "lowerbound": 3,
+            "name": "room_length2",
+            "refCount": 3,
+            "upperbound": 8,
+            "value": "RV.room_length2",
+            "variableClass": "Uncertain"
+        },
+        {
+            "distribution": "Uniform",
+            "inputType": "Parameters",
+            "lowerbound": 2.5,
+            "name": "room_height",
+            "refCount": 3,
+            "upperbound": 3.2,
+            "value": "RV.room_height",
+            "variableClass": "Uncertain"
+        },
+        {
+            "distribution": "Lognormal",
+            "inputType": "Moments",
+            "mean": 0.2,
+            "name": "zeta",
+            "refCount": 2,
+            "stdDev": 0.2,
+            "value": "RV.zeta",
+            "variableClass": "Uncertain"
+        }
+    ],
+    "remoteAppDir": "/Applications/quoFEM.app/Contents/MacOS",
+    "resultType": "SimCenterUQResultsSampling",
+    "runDir": "/Users/emilynakamura/Documents/quoFEM/LocalWorkDir/tmp.SimCenter",
+    "runType": "runningLocal",
+    "summary": [
+    ],
+    "workingDir": "/Users/emilynakamura/Documents/quoFEM/LocalWorkDir"
+}
