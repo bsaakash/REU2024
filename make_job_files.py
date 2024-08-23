@@ -16,10 +16,9 @@ def make_column_section_size_grouped_list(group_size=10):
 
 
 if __name__ == "__main__":
-
     group_size = 43
     grouped_list = make_column_section_size_grouped_list(group_size)
-    
+
     num_groups = len(grouped_list)
 
     for i in range(num_groups):
@@ -27,10 +26,9 @@ if __name__ == "__main__":
         files_dir = base / "all_files"
         destination = base / "group_files" / f"group_{i}"
         if not destination.is_dir():
-            # destination.mkdir()
             shutil.copytree(files_dir, destination)
 
-        job_script = destination / "abs_job_script.sh"
+        job_script = destination / "job_script.sh"
         with open(job_script, "r") as file:
             job_script_content = file.readlines()
 
@@ -45,23 +43,8 @@ if __name__ == "__main__":
         with open(job_script, "w") as file:
             file.writelines(job_script_content)
 
-        # runjob = destination / "runjob.sh"
-        # with open(runjob, "r") as file:
-        #     runjob_content = file.readlines()
-
-        # for j, line in enumerate(runjob_content):
-        #     if "python3 fragility_analysis.py" in line:
-        #         runjob_content[j] = f"python3 fragility_analysis.py {i} \n"
-
-        # with open(runjob, "w") as file:
-        #     file.writelines(runjob_content)
-
         sections_file = destination / "section_sizes.txt"
         with open(sections_file, "w") as file:
             file.write("\n".join(grouped_list[i]))
-
-        # print(job_script_content)
-        # print(runjob_content)
-        # print(grouped_list[i])
 
 print("Done!")
