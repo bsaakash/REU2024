@@ -1,0 +1,3 @@
+#!/bin/bash
+python3 writeParam.py paramsDakota.in params.in
+source ./driver
