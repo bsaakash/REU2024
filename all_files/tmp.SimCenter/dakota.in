@@ -5,8 +5,8 @@ environment
 method,
  sampling
  sample_type = lhs 
- samples = 50 
- seed = 439
+ samples = 96 
+ seed = 542
 
 variables 
  active uncertain 
@@ -38,14 +38,12 @@ interface
    work_directory
      named 'workdir' 
      directory_tag
-     directory_save
-     file_save
      copy_files = 'templatedir/*' 
-  asynchronous evaluation_concurrency = 8
+  asynchronous 
 
 responses
  response_functions = 1
- response_descriptors = 'out' 
+ response_descriptors = 'failure_indicator' 
  no_gradients
  no_hessians
 

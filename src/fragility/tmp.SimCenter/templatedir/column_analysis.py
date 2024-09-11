@@ -1,11 +1,9 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from params import *
 from column_config import *
 import fire_curves
 import material_properties
 import thermal_analyses
-import room_geometry
 from parse_section_factor import get_section_properties
 
 # TODO  implement the real column demand based on the database.
@@ -17,7 +15,7 @@ room_temperature_modulus = 200000  # MPa
 # alpha = 12e-6  # coefficient of thermal expansion (1/°C)
 steel_room_temperature_density = 7850  # kg/m^3 STEEL
 room_temperature_specific_heat = 460  # J/kg K
-convective_heat_transfer_coefficient = 25  # W/m^2 K
+convective_heat_transfer_coefficient = 35  # W/m^2 K
 material_emissivity = 0.7
 # thermal_conductivity = 45.8  # W/mK
 # density = steel_room_temperature_density  # kg/m^3
@@ -124,7 +122,9 @@ effective_elastic_modulus = mech_mat_prop.elastic_modulus(
 
 # failure evaluation:
 capacity = np.pi**2 * effective_elastic_modulus * I / L**2  # MN
-demand = DCR * capacity[0] #* L / (np.sqrt(L**2 - (e * L) ** 2))  # + max(internal_force)
+demand = (
+    DCR * capacity[0]
+)  # * L / (np.sqrt(L**2 - (e * L) ** 2))  # + max(internal_force)
 if min(capacity) > demand:
     out = 0
 else:
